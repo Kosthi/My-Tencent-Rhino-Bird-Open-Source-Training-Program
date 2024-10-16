@@ -1,0 +1,294 @@
+PW0-PW1: Cyclic
+1->PW->2->PW->1
+
+PW0-PCW1: Cyclic
+1->PW->2->PCW->1
+
+PW0-PI1: Cyclic
+1->PW->2->PI->1
+
+PW0-PCI1: Cyclic
+1->PW->2->PCI->1
+
+PW0-RW1: Cyclic
+1->PW->2->RW->1
+
+PW0-RCW1: Cyclic
+1->PW->2->RCW->1
+
+PW0-RI1: Cyclic
+1->PW->2->RI->1
+
+PW0-RCI1: Cyclic
+1->PW->2->RCI->1
+
+PW0-WP1: Cyclic
+1->PW->2->WP->1
+
+PW0-WCP1: Cyclic
+1->PW->2->WCP->1
+
+PW0-WR1: Cyclic
+1->PW->2->WR->1
+
+PW0-WCR1: Cyclic
+1->PW->2->WCR->1
+
+PW0-WCW1: Cyclic
+1->PW->2->WCW->1
+
+PW0-WI1: Avoid
+1->PW->2
+
+PW0-WCI1: Avoid
+
+
+PW0-IP1: Avoid
+
+
+PW0-ICP1: Avoid
+
+
+PW0-IR1: Avoid
+
+
+PW0-ICR1: Avoid
+
+
+PW0-IW1: Avoid
+
+
+PW0-ICW1: Avoid
+
+
+PW0-II1: Avoid
+
+
+PW0-ICI1: Avoid
+
+
+PI0-PW1: Avoid
+
+
+PI0-PCW1: Avoid
+
+
+PI0-PI1: Avoid
+
+
+PI0-PCI1: Avoid
+
+
+PI0-RW1: Avoid
+
+
+PI0-RCW1: Avoid
+
+
+PI0-RI1: Avoid
+
+
+PI0-RCI1: Avoid
+
+
+PI0-WP1: Avoid
+
+
+PI0-WCP1: Avoid
+
+
+PI0-WR1: Avoid
+
+
+PI0-WCR1: Avoid
+
+
+PI0-WW1: Avoid
+
+
+PI0-WCW1: Avoid
+
+
+PI0-WI1: Avoid
+
+
+PI0-WCI1: Avoid
+
+
+PI0-IP1: Avoid
+
+
+PI0-ICP1: Avoid
+
+
+PI0-IR1: Avoid
+
+
+PI0-ICR1: Avoid
+
+
+PI0-IW1: Avoid
+
+
+PI0-ICW1: Avoid
+
+
+PI0-II1: Avoid
+
+
+PI0-ICI1: Avoid
+
+
+RW0-PW1: Avoid
+
+
+RW0-PCW1: Avoid
+
+
+RW0-PI1: Avoid
+
+
+RW0-PCI1: Avoid
+
+
+RW0-RW1: Avoid
+
+
+RW0-RCW1: Avoid
+
+
+RW0-RI1: Avoid
+
+
+RW0-RCI1: Avoid
+
+
+RW0-WP1: Avoid
+
+
+RW0-WCP1: Avoid
+
+
+RW0-WR1: Avoid
+
+
+RW0-WCR1: Avoid
+
+
+RW0-WW1: Avoid
+
+
+RW0-WCW1: Avoid
+
+
+RW0-WI1: Avoid
+
+
+RW0-WCI1: Avoid
+
+
+RW0-IP1: Avoid
+
+
+RW0-ICP1: Avoid
+
+
+RW0-IR1: Avoid
+
+
+RW0-ICR1: Avoid
+
+
+RW0-IW1: Avoid
+
+
+RW0-ICW1: Avoid
+
+
+RW0-II1: Avoid
+
+
+RW0-ICI1: Avoid
+
+
+RI0-PW1: Avoid
+
+
+RI0-PCW1: Avoid
+
+
+RI0-PI1: Avoid
+
+
+RI0-PCI1: Avoid
+
+
+RI0-RW1: Avoid
+
+
+RI0-RCW1: Avoid
+
+
+RI0-RI1: Avoid
+
+
+RI0-RCI1: Avoid
+
+
+RI0-WP1: Avoid
+
+
+RI0-WCP1: Avoid
+
+
+RI0-WR1: Avoid
+
+
+RI0-WCR1: Avoid
+
+
+RI0-WW1: Avoid
+
+
+RI0-WCW1: Avoid
+
+
+RI0-WI1: Avoid
+
+
+RI0-WCI1: Avoid
+
+
+RI0-IP1: Avoid
+
+
+RI0-ICP1: Avoid
+
+
+RI0-IR1: Avoid
+
+
+RI0-ICR1: Avoid
+
+
+RI0-IW1: Avoid
+
+
+RI0-ICW1: Avoid
+
+
+RI0-II1: Avoid
+
+
+RI0-ICI1: Avoid
+
+
+WP0-PW1: Avoid
+
+
+WP0-PCW1: Avoid
+
+
+WP0-PI1: Avoid
+
+

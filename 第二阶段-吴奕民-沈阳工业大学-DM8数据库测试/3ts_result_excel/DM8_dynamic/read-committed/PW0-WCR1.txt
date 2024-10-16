@@ -1,0 +1,50 @@
+#### db_type: dm8 ####
+#### test_name: PW0-WCR1 ####
+#### isolation_level: read-committed ####
+
+Preparation: create new tables and insert necessory rows
+Execution: execute transactions in parallel
+ 
+----------PW0-WCR1 test preparation----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+Q0-T1 execute sql: 'CREATE TABLE t1 (k INT PRIMARY KEY, v INT);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (0,0);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (2,2);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (4,4);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (1,1);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (3,3);'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+
+----------PW0-WCR1 test execution----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1-T1 finished at: 2024-10-11 22:42:24:663:504
+Q1-T1 execute sql: 'set transaction isolation level read committed;'
+Q1-T1 finished at: 2024-10-11 22:42:24:667:171
+Q2-T1 execute sql: 'SELECT * FROM t1 WHERE k>0 and k<2;'
+Q2-T1 return result: (1,1) 
+Q2-T1 finished at: 2024-10-11 22:42:24:678:205
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3-T2 finished at: 2024-10-11 22:42:24:770:511
+                                        Q3-T2 execute sql: 'set transaction isolation level read committed;'
+                                        Q3-T2 finished at: 2024-10-11 22:42:24:779:530
+                                        Q4-T2 execute sql: 'UPDATE t1 SET v=4 WHERE k=3;'
+                                        Q4-T2 finished at: 2024-10-11 22:42:24:793:894
+                                        Q5-T2 execute sql: 'UPDATE t1 SET v=2 WHERE k=1;'
+                                        Q5-T2 finished at: 2024-10-11 22:42:24:802:453
+                                        Q6-T2 execute opt: 'COMMIT;'
+                                        Q6-T2 finished at: 2024-10-11 22:42:24:805:436
+Q7-T1 execute sql: 'SELECT * FROM t1 WHERE k=3;'
+Q7-T1 return result: (3,4) 
+Q7-T1 finished at: 2024-10-11 22:42:24:814:261
+Q8-T1 execute opt: 'COMMIT;'
+Q8-T1 finished at: 2024-10-11 22:42:24:816:420
+
+Test Result: Finish
+Reason: The test case was finished without rollback, to be checked if consistent
+

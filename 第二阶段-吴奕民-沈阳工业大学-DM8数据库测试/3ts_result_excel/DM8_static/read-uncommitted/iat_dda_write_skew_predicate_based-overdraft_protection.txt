@@ -1,0 +1,79 @@
+#### db_type: dm8 ####
+#### test_type: dda_write_skew_predicate_based-overdraft_protection ####
+#### isolation: read-uncommitted ####
+
+current_result: The query result of the current SQL statement. Each row of table is separated by a space, and the fields in each row are separated by commas
+expected_result: The expected result is the expected query result for each SQL that conforms to the serializability theory
+ 
+----------iat_dda_write_skew_predicate_based-overdraft_protection test prepare----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS account;'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'create table account (name varchar(255) not null, type varchar(255) not null, balance int not null, primary key (name, type))'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT into account VALUES ('kevin','saving', 500);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT into account VALUES ('kevin','checking', 500);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute opt: 'COMMIT';
+T1 sleeping for 0 ms before executing next SQL
+
+----------iat_dda_write_skew_predicate_based-overdraft_protection test run----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1 finished at: 2024-10-11 19:21:28:674:410
+Q1-T1 execute sql: 'set transaction isolation level read uncommitted;'
+Q1 finished at: 2024-10-11 19:21:28:677:322
+T1 sleeping for 50 ms before executing next SQL
+Q2-T1 execute sql: 'SELECT type, balance FROM account WHERE name = 'kevin';'
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3 finished at: 2024-10-11 19:21:28:768:493
+                                        Q3-T2 execute sql: 'set transaction isolation level read uncommitted;'
+                                        Q3 finished at: 2024-10-11 19:21:28:778:270
+                                        T2 sleeping for 50 ms before executing next SQL
+   current_result: 
+     (checking,500,) (saving,500,) 
+  *(1) expected_result: 
+     (checking,500,) (saving,500,) 
+   (2) expected_result: 
+     (checking,1400,) (saving,500,) 
+
+Q2 finished at: 2024-10-11 19:21:28:783:104
+T1 sleeping for 50 ms before executing next SQL
+                                        Q4-T2 execute sql: 'SELECT type, balance FROM account WHERE name = 'kevin';'
+                                           current_result: 
+                                             (checking,500,) (saving,500,) 
+                                           (1) expected_result: 
+                                             (checking,500,) (saving,1400,) 
+                                          *(2) expected_result: 
+                                             (checking,500,) (saving,500,) 
+
+                                        Q4 finished at: 2024-10-11 19:21:28:859:592
+                                        T2 sleeping for 50 ms before executing next SQL
+Q7-T1 execute sql: 'UPDATE account SET balance = balance + 900 WHERE name = 'kevin' and type = 'checking';'
+Q7 finished at: 2024-10-11 19:21:28:875:188
+T1 sleeping for 50 ms before executing next SQL
+                                        Q5-T2 execute sql: 'UPDATE account SET balance = balance + 900 WHERE name = 'kevin' and type = 'saving';'
+Q8-T1 execute opt: 'COMMIT';
+                                        Q5 finished at: 2024-10-11 19:21:28:929:568
+                                        T2 sleeping for 50 ms before executing next SQL
+Q8 finished at: 2024-10-11 19:21:28:930:93
+T1 sleeping for 50 ms before executing next SQL
+                                        Q6-T2 execute opt: 'COMMIT';
+                                        Q6 finished at: 2024-10-11 19:21:28:987:497
+                                        T2 sleeping for 50 ms before executing next SQL
+                                                                                Q9-T3 execute sql: 'SELECT * FROM account;'
+                                                                                   current_result: 
+                                                                                     (kevin,saving,1400) (kevin,checking,1400) 
+                                                                                   (1) expected_result: 
+                                                                                     (kevin,checking,1400) (kevin,saving,1400) 
+                                                                                   (2) expected_result: 
+                                                                                     (kevin,checking,1400) (kevin,saving,1400) 
+
+                                                                                Q9 finished at: 2024-10-11 19:21:29:66:578
+                                                                                T3 sleeping for 50 ms before executing next SQL
+                                                                                Q10-T3 execute opt: 'COMMIT';
+                                                                                Q10 finished at: 2024-10-11 19:21:29:122:293
+                                                                                T3 sleeping for 50 ms before executing next SQL
+
+Test Result: Anomaly
+Reason: Data anomaly is not recognized by the database, resulting in data inconsistencies
+

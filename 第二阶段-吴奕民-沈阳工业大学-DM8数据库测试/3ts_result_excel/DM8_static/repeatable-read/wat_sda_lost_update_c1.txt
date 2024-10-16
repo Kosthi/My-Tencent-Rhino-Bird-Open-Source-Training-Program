@@ -1,0 +1,52 @@
+#### db_type: dm8 ####
+#### test_type: sda_lost_update_c1 ####
+#### isolation: repeatable-read ####
+
+current_result: The query result of the current SQL statement. Each row of table is separated by a space, and the fields in each row are separated by commas
+expected_result: The expected result is the expected query result for each SQL that conforms to the serializability theory
+ 
+----------wat_sda_lost_update_c1 test prepare----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'CREATE TABLE t1 (k INT PRIMARY KEY, v INT);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (0, 0);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute opt: 'COMMIT';
+T1 sleeping for 0 ms before executing next SQL
+
+----------wat_sda_lost_update_c1 test run----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1 finished at: 2024-10-11 19:22:59:845:820
+Q1-T1 execute sql: 'set transaction isolation level repeatable read;'
+Q1 finished at: 2024-10-11 19:22:59:849:716
+T1 sleeping for 50 ms before executing next SQL
+Q2-T1 execute sql: 'SELECT * FROM t1 WHERE k=0;'
+   current_result: 
+     (0,0) 
+  *(1) expected_result: 
+     (0,0) 
+   (2) expected_result: 
+     (0,2) 
+
+Q2 finished at: 2024-10-11 19:22:59:930:582
+T1 sleeping for 50 ms before executing next SQL
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3 finished at: 2024-10-11 19:22:59:938:848
+                                        Q3-T2 execute sql: 'set transaction isolation level repeatable read;'
+                                        Q3 finished at: 2024-10-11 19:22:59:942:810
+                                        T2 sleeping for 50 ms before executing next SQL
+                                        Q4-T2 execute sql: 'UPDATE t1 SET v=2 WHERE k=0;'
+                                        Q4 finished at: 2024-10-11 19:23:0:14:772
+                                        T2 sleeping for 50 ms before executing next SQL
+Q5-T1 execute sql: 'UPDATE t1 SET v=1 WHERE k=0;'
+                                        Q7-T2 execute opt: 'COMMIT';
+                                        Q7 finished at: 2024-10-11 19:23:0:150:746
+                                        T2 sleeping for 50 ms before executing next SQL
+Q5 failed reason: Can't serialize access due to concurrent update errcode: HY000
+Q5 failed at: 2024-10-11 19:23:0:653:319
+T1 sleeping for 50 ms before executing next SQL
+
+Test Result: Rollback
+Reason: Err:Can't serialize access due to concurrent update
+

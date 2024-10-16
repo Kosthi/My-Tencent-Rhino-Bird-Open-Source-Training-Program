@@ -1,0 +1,134 @@
+#### db_type: dm8 ####
+#### test_type: mda_step_rat_predicate_based_delete ####
+#### isolation: serializable ####
+
+current_result: The query result of the current SQL statement. Each row of table is separated by a space, and the fields in each row are separated by commas
+expected_result: The expected result is the expected query result for each SQL that conforms to the serializability theory
+ 
+----------rat_mda_step_rat_predicate_based_delete test prepare----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'CREATE TABLE t1 (k INT PRIMARY KEY, v INT);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (0, 1);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (1, 1);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (2, 1);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute opt: 'COMMIT';
+T1 sleeping for 0 ms before executing next SQL
+
+----------rat_mda_step_rat_predicate_based_delete test run----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1 finished at: 2024-10-11 19:23:56:723:874
+Q1-T1 execute sql: 'set transaction isolation level serializable;'
+Q1 finished at: 2024-10-11 19:23:56:727:121
+T1 sleeping for 50 ms before executing next SQL
+Q2-T1 execute sql: 'DELETE FROM t1 WHERE k=0;'
+Q2 finished at: 2024-10-11 19:23:56:803:437
+T1 sleeping for 50 ms before executing next SQL
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3 finished at: 2024-10-11 19:23:56:820:0
+                                        Q3-T2 execute sql: 'set transaction isolation level serializable;'
+                                        Q3 finished at: 2024-10-11 19:23:56:823:674
+                                        T2 sleeping for 50 ms before executing next SQL
+                                        Q4-T2 execute sql: 'DELETE FROM t1 WHERE k=1;'
+                                        Q4 finished at: 2024-10-11 19:23:56:894:466
+                                        T2 sleeping for 50 ms before executing next SQL
+                                                                                Q6-T3 execute opt: 'BEGIN;'
+                                                                                Q6 finished at: 2024-10-11 19:23:56:924:680
+                                                                                Q6-T3 execute sql: 'set transaction isolation level serializable;'
+                                                                                Q6 finished at: 2024-10-11 19:23:56:927:969
+                                                                                T3 sleeping for 50 ms before executing next SQL
+                                        Q5-T2 execute sql: 'SELECT SUM(v) FROM t1 WHERE k = 0;'
+                                           current_result: 
+                                             (1,) 
+                                           (1) expected_result: 
+                                             (,) 
+                                           (2) expected_result: 
+                                             (,) 
+                                          *(3) expected_result: 
+                                             (1,) 
+                                          *(4) expected_result: 
+                                             (1,) 
+                                           (5) expected_result: 
+                                             (,) 
+                                          *(6) expected_result: 
+                                             (1,) 
+
+                                        Q5 finished at: 2024-10-11 19:23:56:960:338
+                                        T2 sleeping for 50 ms before executing next SQL
+                                                                                Q7-T3 execute sql: 'DELETE FROM t1 WHERE k=2;'
+                                                                                Q7 finished at: 2024-10-11 19:23:56:990:856
+                                                                                T3 sleeping for 50 ms before executing next SQL
+Q9-T1 execute sql: 'SELECT SUM(v) FROM t1 WHERE k = 2;'
+   current_result: 
+     (1,) 
+  *(1) expected_result: 
+     (1,) 
+  *(2) expected_result: 
+     (1,) 
+  *(3) expected_result: 
+     (1,) 
+   (4) expected_result: 
+     (,) 
+   (5) expected_result: 
+     (,) 
+   (6) expected_result: 
+     (,) 
+
+Q9 finished at: 2024-10-11 19:23:57:30:773
+T1 sleeping for 50 ms before executing next SQL
+                                                                                Q8-T3 execute sql: 'SELECT SUM(v) FROM t1 WHERE k = 1;'
+                                                                                   current_result: 
+                                                                                     (1,) 
+                                                                                   (1) expected_result: 
+                                                                                     (,) 
+                                                                                  *(2) expected_result: 
+                                                                                     (1,) 
+                                                                                   (3) expected_result: 
+                                                                                     (,) 
+                                                                                  *(4) expected_result: 
+                                                                                     (1,) 
+                                                                                  *(5) expected_result: 
+                                                                                     (1,) 
+                                                                                  *(6) expected_result: 
+                                                                                     (1,) 
+
+                                                                                Q8 finished at: 2024-10-11 19:23:57:56:459
+                                                                                T3 sleeping for 50 ms before executing next SQL
+Q10-T1 execute opt: 'COMMIT';
+Q10 finished at: 2024-10-11 19:23:57:85:447
+T1 sleeping for 50 ms before executing next SQL
+                                        Q11-T2 execute opt: 'COMMIT';
+                                        Q11 finished at: 2024-10-11 19:23:57:124:786
+                                        T2 sleeping for 50 ms before executing next SQL
+                                                                                Q12-T3 execute opt: 'COMMIT';
+                                                                                Q12 finished at: 2024-10-11 19:23:57:226:911
+                                                                                T3 sleeping for 50 ms before executing next SQL
+                                                                                                                        Q13-T4 execute sql: 'SELECT * FROM t1;'
+                                                                                                                           current_result: 
+                                                                                                                             null 
+                                                                                                                          *(1) expected_result: 
+                                                                                                                             null 
+                                                                                                                          *(2) expected_result: 
+                                                                                                                             null 
+                                                                                                                          *(3) expected_result: 
+                                                                                                                             null 
+                                                                                                                          *(4) expected_result: 
+                                                                                                                             null 
+                                                                                                                          *(5) expected_result: 
+                                                                                                                             null 
+                                                                                                                          *(6) expected_result: 
+                                                                                                                             null 
+
+                                                                                                                        Q13 finished at: 2024-10-11 19:23:57:298:992
+                                                                                                                        T4 sleeping for 50 ms before executing next SQL
+                                                                                                                        Q14-T4 execute opt: 'COMMIT';
+                                                                                                                        Q14 finished at: 2024-10-11 19:23:57:356:457
+                                                                                                                        T4 sleeping for 50 ms before executing next SQL
+
+Test Result: Anomaly
+Reason: Data anomaly is not recognized by the database, resulting in data inconsistencies
+

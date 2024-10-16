@@ -1,0 +1,60 @@
+#### db_type: dm8 ####
+#### test_type: mda_step_wat_c1 ####
+#### isolation: repeatable-read ####
+
+current_result: The query result of the current SQL statement. Each row of table is separated by a space, and the fields in each row are separated by commas
+expected_result: The expected result is the expected query result for each SQL that conforms to the serializability theory
+ 
+----------wat_mda_step_wat_c1 test prepare----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'CREATE TABLE t1 (k INT PRIMARY KEY, v INT);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (0, 0);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (1, 0);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (2, 0);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute opt: 'COMMIT';
+T1 sleeping for 0 ms before executing next SQL
+
+----------wat_mda_step_wat_c1 test run----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1 finished at: 2024-10-11 19:23:16:742:427
+Q1-T1 execute sql: 'set transaction isolation level repeatable read;'
+Q1 finished at: 2024-10-11 19:23:16:747:438
+T1 sleeping for 50 ms before executing next SQL
+Q2-T1 execute sql: 'UPDATE t1 SET v=1 WHERE k=0;'
+Q2 finished at: 2024-10-11 19:23:16:822:512
+T1 sleeping for 50 ms before executing next SQL
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3 finished at: 2024-10-11 19:23:16:843:480
+                                        Q3-T2 execute sql: 'set transaction isolation level repeatable read;'
+                                        Q3 finished at: 2024-10-11 19:23:16:849:731
+                                        T2 sleeping for 50 ms before executing next SQL
+                                        Q4-T2 execute sql: 'UPDATE t1 SET v=2 WHERE k=1;'
+                                        Q4 finished at: 2024-10-11 19:23:16:923:446
+                                        T2 sleeping for 50 ms before executing next SQL
+                                                                                Q6-T3 execute opt: 'BEGIN;'
+                                                                                Q6 finished at: 2024-10-11 19:23:16:938:175
+                                                                                Q6-T3 execute sql: 'set transaction isolation level repeatable read;'
+                                                                                Q6 finished at: 2024-10-11 19:23:16:941:811
+                                                                                T3 sleeping for 50 ms before executing next SQL
+                                        Q5-T2 execute sql: 'UPDATE t1 SET v=2 WHERE k=0;'
+                                                                                Q7-T3 execute sql: 'UPDATE t1 SET v=3 WHERE k=2;'
+                                                                                Q7 finished at: 2024-10-11 19:23:17:2:241
+                                                                                T3 sleeping for 50 ms before executing next SQL
+Q9-T1 execute sql: 'UPDATE t1 SET v=1 WHERE k=2;'
+                                                                                Q8-T3 execute sql: 'UPDATE t1 SET v=3 WHERE k=1;'
+                                                                                Q8 failed reason: Deadlock errcode: 40001
+                                                                                Q8 failed at: 2024-10-11 19:23:18:221:148
+                                                                                T3 sleeping for 50 ms before executing next SQL
+Q9 finished at: 2024-10-11 19:23:18:277:530
+T1 sleeping for 50 ms before executing next SQL
+                                        Q5 finished at: 2024-10-11 19:23:18:344:411
+                                        T2 sleeping for 50 ms before executing next SQL
+
+Test Result: Rollback
+Reason: Err:Deadlock
+

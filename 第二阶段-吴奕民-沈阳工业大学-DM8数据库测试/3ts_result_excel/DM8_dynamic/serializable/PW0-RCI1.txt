@@ -1,0 +1,48 @@
+#### db_type: dm8 ####
+#### test_name: PW0-RCI1 ####
+#### isolation_level: serializable ####
+
+Preparation: create new tables and insert necessory rows
+Execution: execute transactions in parallel
+ 
+----------PW0-RCI1 test preparation----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+Q0-T1 execute sql: 'CREATE TABLE t1 (k INT PRIMARY KEY, v INT);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (0,0);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (2,2);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (4,4);'
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (1,1);'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+
+----------PW0-RCI1 test execution----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1-T1 finished at: 2024-10-11 23:14:44:25:754
+Q1-T1 execute sql: 'set transaction isolation level serializable;'
+Q1-T1 finished at: 2024-10-11 23:14:44:27:209
+Q2-T1 execute sql: 'SELECT * FROM t1 WHERE k>0 and k<2;'
+Q2-T1 return result: (1,1) 
+Q2-T1 finished at: 2024-10-11 23:14:44:32:592
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3-T2 finished at: 2024-10-11 23:14:44:131:227
+                                        Q3-T2 execute sql: 'set transaction isolation level serializable;'
+                                        Q3-T2 finished at: 2024-10-11 23:14:44:139:449
+                                        Q4-T2 execute sql: 'SELECT * FROM t1 WHERE k=3;'
+                                        Q4-T2 return result: null 
+                                        Q4-T2 finished at: 2024-10-11 23:14:44:147:707
+                                        Q5-T2 execute sql: 'UPDATE t1 SET v=2 WHERE k=1;'
+                                        Q5-T2 finished at: 2024-10-11 23:14:44:154:850
+                                        Q6-T2 execute opt: 'COMMIT;'
+                                        Q6-T2 finished at: 2024-10-11 23:14:44:157:238
+Q7-T1 execute sql: 'INSERT INTO t1 VALUES (3,3);'
+Q7-T1 finished at: 2024-10-11 23:14:44:163:302
+Q8-T1 execute opt: 'COMMIT;'
+Q8-T1 finished at: 2024-10-11 23:14:44:165:803
+
+Test Result: Finish
+Reason: The test case was finished without rollback, to be checked if consistent
+

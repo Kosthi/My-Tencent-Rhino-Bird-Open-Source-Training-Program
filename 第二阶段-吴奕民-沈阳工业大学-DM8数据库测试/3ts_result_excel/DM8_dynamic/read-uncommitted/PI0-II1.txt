@@ -1,0 +1,20 @@
+#### db_type: dm8 ####
+#### test_name: PI0-II1 ####
+#### isolation_level: read-uncommitted ####
+
+Preparation: create new tables and insert necessory rows
+Execution: execute transactions in parallel
+ 
+----------PI0-II1 test preparation----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+Q0-T1 failed reason: [unixODBC][Driver Manager]Function sequence error errcode: HY010
+Q0-T1 failed at: 2024-10-11 22:32:30:580:858
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+
+Test Result: Rollback
+Reason: [unixODBC][Driver Manager]Function sequence error
+

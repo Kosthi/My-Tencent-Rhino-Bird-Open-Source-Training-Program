@@ -1,0 +1,67 @@
+#### db_type: dm8 ####
+#### test_type: sda_lost_update_c1 ####
+#### isolation: read-committed ####
+
+current_result: The query result of the current SQL statement. Each row of table is separated by a space, and the fields in each row are separated by commas
+expected_result: The expected result is the expected query result for each SQL that conforms to the serializability theory
+ 
+----------wat_sda_lost_update_c1 test prepare----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'CREATE TABLE t1 (k INT PRIMARY KEY, v INT);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (0, 0);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute opt: 'COMMIT';
+T1 sleeping for 0 ms before executing next SQL
+
+----------wat_sda_lost_update_c1 test run----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1 finished at: 2024-10-11 19:22:2:218:366
+Q1-T1 execute sql: 'set transaction isolation level read committed;'
+Q1 finished at: 2024-10-11 19:22:2:222:29
+T1 sleeping for 50 ms before executing next SQL
+Q2-T1 execute sql: 'SELECT * FROM t1 WHERE k=0;'
+   current_result: 
+     (0,0) 
+  *(1) expected_result: 
+     (0,0) 
+   (2) expected_result: 
+     (0,2) 
+
+Q2 finished at: 2024-10-11 19:22:2:284:353
+T1 sleeping for 50 ms before executing next SQL
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3 finished at: 2024-10-11 19:22:2:310:100
+                                        Q3-T2 execute sql: 'set transaction isolation level read committed;'
+                                        Q3 finished at: 2024-10-11 19:22:2:313:150
+                                        T2 sleeping for 50 ms before executing next SQL
+                                        Q4-T2 execute sql: 'UPDATE t1 SET v=2 WHERE k=0;'
+                                        Q4 finished at: 2024-10-11 19:22:2:374:384
+                                        T2 sleeping for 50 ms before executing next SQL
+Q5-T1 execute sql: 'UPDATE t1 SET v=1 WHERE k=0;'
+                                        Q7-T2 execute opt: 'COMMIT';
+                                        Q7 finished at: 2024-10-11 19:22:2:516:37
+                                        T2 sleeping for 50 ms before executing next SQL
+Q5 finished at: 2024-10-11 19:22:2:517:222
+T1 sleeping for 50 ms before executing next SQL
+Q6-T1 execute opt: 'COMMIT';
+Q6 finished at: 2024-10-11 19:22:2:584:77
+T1 sleeping for 50 ms before executing next SQL
+                                                                                Q8-T3 execute sql: 'SELECT * FROM t1;'
+                                                                                   current_result: 
+                                                                                     (0,1) 
+                                                                                   (1) expected_result: 
+                                                                                     (0,2) 
+                                                                                  *(2) expected_result: 
+                                                                                     (0,1) 
+
+                                                                                Q8 finished at: 2024-10-11 19:22:2:664:352
+                                                                                T3 sleeping for 50 ms before executing next SQL
+                                                                                Q9-T3 execute opt: 'COMMIT';
+                                                                                Q9 finished at: 2024-10-11 19:22:2:723:249
+                                                                                T3 sleeping for 50 ms before executing next SQL
+
+Test Result: Anomaly
+Reason: Data anomaly is not recognized by the database, resulting in data inconsistencies
+

@@ -1,0 +1,62 @@
+#### db_type: dm8 ####
+#### test_type: sda_dirty_write_2commit ####
+#### isolation: read-uncommitted ####
+
+current_result: The query result of the current SQL statement. Each row of table is separated by a space, and the fields in each row are separated by commas
+expected_result: The expected result is the expected query result for each SQL that conforms to the serializability theory
+ 
+----------wat_sda_dirty_write_2commit test prepare----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'CREATE TABLE t1 (k INT PRIMARY KEY, v INT);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (0, 0);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute opt: 'COMMIT';
+T1 sleeping for 0 ms before executing next SQL
+
+----------wat_sda_dirty_write_2commit test run----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1 finished at: 2024-10-11 19:21:1:885:865
+Q1-T1 execute sql: 'set transaction isolation level read uncommitted;'
+Q1 finished at: 2024-10-11 19:21:1:890:327
+T1 sleeping for 50 ms before executing next SQL
+Q2-T1 execute sql: 'UPDATE t1 SET v=1 WHERE k=0;'
+Q2 finished at: 2024-10-11 19:21:1:960:380
+T1 sleeping for 50 ms before executing next SQL
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3 finished at: 2024-10-11 19:21:1:983:47
+                                        Q3-T2 execute sql: 'set transaction isolation level read uncommitted;'
+                                        Q3 finished at: 2024-10-11 19:21:1:988:788
+                                        T2 sleeping for 50 ms before executing next SQL
+                                        Q4-T2 execute sql: 'UPDATE t1 SET v=2 WHERE k=0;'
+Q5-T1 execute opt: 'COMMIT';
+Q5 finished at: 2024-10-11 19:21:2:83:224
+T1 sleeping for 50 ms before executing next SQL
+                                        Q4 finished at: 2024-10-11 19:21:2:84:363
+                                        T2 sleeping for 50 ms before executing next SQL
+                                        Q6-T2 execute opt: 'COMMIT';
+                                        Q6 finished at: 2024-10-11 19:21:2:181:434
+                                        T2 sleeping for 50 ms before executing next SQL
+                                                                                Q7-T3 execute sql: 'SELECT * FROM t1;'
+                                                                                   current_result: 
+                                                                                     (0,2) 
+                                                                                   (1) expected_result: 
+                                                                                     (0,1) 
+                                                                                  *(2) expected_result: 
+                                                                                     (0,2) 
+
+                                                                                Q7 finished at: 2024-10-11 19:21:2:254:789
+                                                                                T3 sleeping for 50 ms before executing next SQL
+                                                                                Q8-T3 execute sql: 'DROP TABLE IF EXISTS t1;'
+                                                                                Q8 finished at: 2024-10-11 19:21:2:424:150
+                                                                                T3 sleeping for 50 ms before executing next SQL
+                                                                                Q9-T3 execute opt: 'COMMIT';
+                                                                                Q9 finished at: 2024-10-11 19:21:2:478:855
+                                                                                T3 sleeping for 50 ms before executing next SQL
+
+The current result is consistent with the [(2) expected_result] of serial scheduling
+
+Test Result: Avoid
+Reason: Data anomaly did not occur and the data is consistent
+

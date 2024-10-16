@@ -1,0 +1,20 @@
+#### db_type: dm8 ####
+#### test_name: RI0-RI1 ####
+#### isolation_level: repeatable-read ####
+
+Preparation: create new tables and insert necessory rows
+Execution: execute transactions in parallel
+ 
+----------RI0-RI1 test preparation----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+Q0-T1 failed reason: [unixODBC][Driver Manager]Function sequence error errcode: HY010
+Q0-T1 failed at: 2024-10-11 23:10:53:284:12
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+Q0-T1 execute opt: 'COMMIT;'
+
+Test Result: Rollback
+Reason: [unixODBC][Driver Manager]Function sequence error
+

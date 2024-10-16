@@ -1,0 +1,36 @@
+PW0-PW1: Cyclic
+1->PW->2->PW->1
+
+PW0-PCW1: Cyclic
+1->PW->2->PCW->1
+
+PW0-PI1: Cyclic
+1->PW->2->PI->1
+
+PW0-PCI1: Cyclic
+1->PW->2->PCI->1
+
+PW0-RW1: Cyclic
+1->PW->2->RW->1
+
+PW0-RCW1: Cyclic
+1->PW->2->RCW->1
+
+PW0-RI1: Cyclic
+1->PW->2->RI->1
+
+PW0-RCI1: Cyclic
+1->PW->2->RCI->1
+
+PW0-WP1: Avoid
+1->PW->2, 1->PW->2
+
+PW0-WCP1: Avoid
+1->PW->2, 1->PCW->2
+
+PW0-WR1: Avoid
+1->PW->2, 1->RW->2
+
+PW0-WCR1: Avoid
+1->PW->2, 1->RCW->2
+

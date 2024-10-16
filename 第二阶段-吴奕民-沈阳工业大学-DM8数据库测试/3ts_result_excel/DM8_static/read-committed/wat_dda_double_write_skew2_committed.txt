@@ -1,0 +1,74 @@
+#### db_type: dm8 ####
+#### test_type: dda_double_write_skew2_committed ####
+#### isolation: read-committed ####
+
+current_result: The query result of the current SQL statement. Each row of table is separated by a space, and the fields in each row are separated by commas
+expected_result: The expected result is the expected query result for each SQL that conforms to the serializability theory
+ 
+----------wat_dda_double_write_skew2_committed test prepare----------
+Q0-T1 execute sql: 'DROP TABLE IF EXISTS t1;'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'CREATE TABLE t1 (k INT PRIMARY KEY, v INT);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (0, 0);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute sql: 'INSERT INTO t1 VALUES (1, 0);'
+T1 sleeping for 0 ms before executing next SQL
+Q0-T1 execute opt: 'COMMIT';
+T1 sleeping for 0 ms before executing next SQL
+
+----------wat_dda_double_write_skew2_committed test run----------
+Q1-T1 execute opt: 'BEGIN;'
+Q1 finished at: 2024-10-11 19:22:4:992:155
+Q1-T1 execute sql: 'set transaction isolation level read committed;'
+Q1 finished at: 2024-10-11 19:22:4:996:251
+T1 sleeping for 50 ms before executing next SQL
+Q2-T1 execute sql: 'UPDATE t1 SET v=1 WHERE k=0;'
+Q2 finished at: 2024-10-11 19:22:5:68:342
+T1 sleeping for 50 ms before executing next SQL
+                                        Q3-T2 execute opt: 'BEGIN;'
+                                        Q3 finished at: 2024-10-11 19:22:5:87:296
+                                        Q3-T2 execute sql: 'set transaction isolation level read committed;'
+                                        Q3 finished at: 2024-10-11 19:22:5:94:259
+                                        T2 sleeping for 50 ms before executing next SQL
+                                        Q4-T2 execute sql: 'UPDATE t1 SET v=1 WHERE k=1;'
+                                        Q4 finished at: 2024-10-11 19:22:5:164:45
+                                        T2 sleeping for 50 ms before executing next SQL
+Q7-T1 execute sql: 'SELECT * FROM t1 WHERE k=1;'
+   current_result: 
+     (1,0) 
+  *(1) expected_result: 
+     (1,0) 
+   (2) expected_result: 
+     (1,1) 
+
+Q7 finished at: 2024-10-11 19:22:5:196:916
+T1 sleeping for 50 ms before executing next SQL
+                                        Q5-T2 execute sql: 'UPDATE t1 SET v=2 WHERE k=0;'
+Q8-T1 execute opt: 'COMMIT';
+Q8 finished at: 2024-10-11 19:22:5:256:599
+T1 sleeping for 50 ms before executing next SQL
+                                        Q5 finished at: 2024-10-11 19:22:5:257:438
+                                        T2 sleeping for 50 ms before executing next SQL
+                                        Q6-T2 execute opt: 'COMMIT';
+                                        Q6 finished at: 2024-10-11 19:22:5:321:970
+                                        T2 sleeping for 50 ms before executing next SQL
+                                                                                Q9-T3 execute sql: 'SELECT * FROM t1 ORDER BY k;'
+                                                                                   current_result: 
+                                                                                     (0,2) (1,1) 
+                                                                                  *(1) expected_result: 
+                                                                                     (0,2) (1,1) 
+                                                                                   (2) expected_result: 
+                                                                                     (0,1) (1,1) 
+
+                                                                                Q9 finished at: 2024-10-11 19:22:5:386:207
+                                                                                T3 sleeping for 50 ms before executing next SQL
+                                                                                Q10-T3 execute opt: 'COMMIT';
+                                                                                Q10 finished at: 2024-10-11 19:22:5:442:112
+                                                                                T3 sleeping for 50 ms before executing next SQL
+
+The current result is consistent with the [(1) expected_result] of serial scheduling
+
+Test Result: Avoid
+Reason: Data anomaly did not occur and the data is consistent
+
